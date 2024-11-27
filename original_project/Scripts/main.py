@@ -38,6 +38,8 @@ def process_img(image):
     lines = cv2.HoughLinesP(processed_img, 1, np.pi/180, 180,      20,       15)
     m1 = 0
     m2 = 0
+    l1 = ()
+    l2 = ()
     try:
         l1, l2, m1,m2 = draw_lanes(original_image,lines)
         cv2.line(original_image, (l1[0], l1[1]), (l1[2], l1[3]), [0,255,0], 30)
