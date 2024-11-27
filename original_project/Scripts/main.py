@@ -46,30 +46,28 @@ def process_img(image):
         print(str(e))
         pass
     
-
     return processed_img,original_image, m1, m2, l1, l2
 
 
 
-
-
-last_time = time.time()
-while True:
-    screen = grab_screen(region=(0,40,800,640))
-    #print('Frame took {} seconds'.format(time.time()-last_time))
+def main():
     last_time = time.time()
-    new_screen,original_image, m1, m2, l1, l2 = process_img(screen)
-    #cv2.imshow('window', new_screen)
-    img_width = original_image.shape[1]
+    while True:
+        screen =  np.array(ImageGrab.grab(bbox=(0,40,800,640)))
+        #print('Frame took {} seconds'.format(time.time()-last_time))
+        last_time = time.time()
+        new_screen,original_image, m1, m2, l1, l2 = process_img(screen)
+        #cv2.imshow('window', new_screen)
+        img_width = original_image.shape[1]
 
         warning_text, color = check_lane_departure(l1, l2, img_width)
         cv2.putText(original_image, warning_text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
 
         cv2.imshow('Lane Departure Warning System', cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
-    
-    #cv2.imshow('window',cv2.cvtColor(screen, cv2.COLOR_BGR2RGB))
-    if cv2.waitKey(25) & 0xFF == ord('q'):
-        cv2.destroyAllWindows()
-        break
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            cv2.destroyAllWindows()
+            break
+
+main()
 
