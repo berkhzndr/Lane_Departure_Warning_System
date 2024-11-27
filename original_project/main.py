@@ -1,10 +1,9 @@
 import numpy as np
+from PIL import ImageGrab
 import cv2
 import time
-import pyautogui
-from directkeys import PressKey,ReleaseKey, W, A, S, D
 from draw_lanes import draw_lanes
-from grabscreen import grab_screen
+from check_lane_departure import check_lane_departure
 
 def roi(img, vertices):
     
@@ -46,63 +45,28 @@ def process_img(image):
     except Exception as e:
         print(str(e))
         pass
-    try:
-        for coords in lines:
-            coords = coords[0]
-            try:
-                cv2.line(processed_img, (coords[0], coords[1]), (coords[2], coords[3]), [255,0,0], 3)
-                
-                
-            except Exception as e:
-                print(str(e))
-    except Exception as e:
-        pass
+    
 
-    return processed_img,original_image, m1, m2
-
-def straight():
-    PressKey(W)
-    ReleaseKey(A)
-    ReleaseKey(D)
-
-def left():
-    PressKey(A)
-    ReleaseKey(W)
-    ReleaseKey(D)
-    ReleaseKey(A)
-
-def right():
-    PressKey(D)
-    ReleaseKey(A)
-    ReleaseKey(W)
-    ReleaseKey(D)
-
-def slow_ya_roll():
-    ReleaseKey(W)
-    ReleaseKey(A)
-    ReleaseKey(D)
+    return processed_img,original_image, m1, m2, l1, l2
 
 
-for i in list(range(4))[::-1]:
-    print(i+1)
-    time.sleep(1)
+
 
 
 last_time = time.time()
 while True:
     screen = grab_screen(region=(0,40,800,640))
-    print('Frame took {} seconds'.format(time.time()-last_time))
+    #print('Frame took {} seconds'.format(time.time()-last_time))
     last_time = time.time()
-    new_screen,original_image, m1, m2 = process_img(screen)
+    new_screen,original_image, m1, m2, l1, l2 = process_img(screen)
     #cv2.imshow('window', new_screen)
-    cv2.imshow('window2',cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
-    
-    if m1 < 0 and m2 < 0:
-        right()
-    elif m1 > 0  and m2 > 0:
-        left()
-    else:
-        straight()
+    img_width = original_image.shape[1]
+
+        warning_text, color = check_lane_departure(l1, l2, img_width)
+        cv2.putText(original_image, warning_text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+
+
+        cv2.imshow('Lane Departure Warning System', cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB))
     
     #cv2.imshow('window',cv2.cvtColor(screen, cv2.COLOR_BGR2RGB))
     if cv2.waitKey(25) & 0xFF == ord('q'):
